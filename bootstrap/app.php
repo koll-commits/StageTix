@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Middleware\EnsureUserHasRole;
+use App\Support\Routing\PortalRoutes;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -10,9 +12,17 @@ return Application::configure(basePath: dirname(__DIR__))
         web: __DIR__.'/../routes/web.php',
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
+        then: function (): void {
+            PortalRoutes::publicSite(base_path('routes/public.php'));
+            PortalRoutes::buyer(base_path('routes/buyer.php'));
+            PortalRoutes::eo(base_path('routes/eo.php'));
+            PortalRoutes::admin(base_path('routes/admin.php'));
+        },
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        $middleware->alias([
+            'role' => EnsureUserHasRole::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

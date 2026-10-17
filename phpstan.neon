@@ -1,0 +1,14 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+
+parameters:
+    level: 1
+    paths:
+        - app/
+        - bootstrap/
+        - database/
+        - routes/
+
+    # Blade/SFC milik modul bukan kelas PHP murni (dicakup lewat test, bukan PHPStan).
+    excludePaths:
+        - app/Modules/*/resources/*
