@@ -4,18 +4,21 @@ namespace App\Modules\Reporting;
 
 use App\Modules\ModuleServiceProvider;
 
-/**
-
- */
-final class ReportingServiceProvider extends ModuleServiceProvider
+class ReportingServiceProvider extends ModuleServiceProvider
 {
+    /**
+     * Register services.
+     */
     public function register(): void
     {
-        // Binding kontrak -> implementasi ditambahkan saat modul diimplementasikan.
+        //
     }
 
-    protected function moduleAlias(): string
+    /**
+     * Bootstrap services.
+     */
+    public function boot(): void
     {
-        return 'reporting';
+        //
     }
 }

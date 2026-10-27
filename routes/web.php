@@ -1,13 +1,17 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\EventController;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return redirect()->route('events.index');
+    return view('welcome');
 });
 
-// Resource route untuk Event Organizer (Tenant Admin)
+Route::get('/login', function () {
+    return 'login page';
+})->name('login');
+
+
 Route::prefix('tenant')->group(function () {
     Route::resource('events', EventController::class);
 });

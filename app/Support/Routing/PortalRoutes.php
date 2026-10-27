@@ -5,39 +5,21 @@ namespace App\Support\Routing;
 use Closure;
 use Illuminate\Support\Facades\Route;
 
-/**
- * Definisi TUNGGAL grup route per portal (prefix + name + middleware). Dipakai oleh
- * routes/{customer,tenant,admin}.php (via bootstrap/app.php) DAN oleh file route milik modul
- * (app/Modules/{Modul}/routes/{portal}.php), sehingga semua route satu portal selalu memakai
- * lapis keamanan yang sama.
- */
 final class PortalRoutes
 {
-    /**
-     * Portal pelanggan (publik, anonim).
-     */
+    public static function web(Closure|string $routes): void
+    {
+        Route::middleware('web')->group($routes);
+    }
+
     public static function customer(Closure|string $routes): void
     {
         Route::middleware('web')
-            ->prefix('kantin/{canteen}')
+            ->prefix('stagetix')
             ->name('customer.')
             ->group($routes);
     }
 
-    /**
-     * Portal operator tenant (internal).
-     */
-    public static function tenant(Closure|string $routes): void
-    {
-        Route::middleware(['web', 'auth', 'verified', 'role:tenant'])
-            ->prefix('tenant/{tenant}')
-            ->name('tenant.')
-            ->group($routes);
-    }
-
-    /**
-     * Portal pengelola kantin (internal).
-     */
     public static function admin(Closure|string $routes): void
     {
         Route::middleware(['web', 'auth', 'verified', 'role:admin'])
@@ -45,4 +27,12 @@ final class PortalRoutes
             ->name('admin.')
             ->group($routes);
     }
+
+    public static function eo(Closure|string $routes): void
+    {
+        Route::middleware(['web', 'auth', 'verified', 'role:eo']) 
+            ->prefix('eo/{eo}') 
+            ->name('eo.') 
+            ->group($routes);
+    }   
 }

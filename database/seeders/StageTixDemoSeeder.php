@@ -150,13 +150,13 @@ class StageTixDemoSeeder extends Seeder
 
     private function seedUsers(): array
     {
-        // [nama, telepon, role]
+        
         $spec = [
             'admin@stagetix.test' => ['Admin StageTix', '+6281200000001', 'admin'],
-            'pembeli@stagetix.test' => ['Pembeli Demo', '+6281200000002', null],
-            'eo1@stagetix.test' => ['Owner Nada Semesta', '+6281200000003', 'tenant'],
-            'eo2@stagetix.test' => ['Owner Riak Rock', '+6281200000004', 'tenant'],
-            'gate1@stagetix.test' => ['Petugas Gate 1', '+6281200000005', null],
+            'pembeli@stagetix.test' => ['Pembeli Demo', '+6281200000002', 'customer'],
+            'eo1@stagetix.test' => ['Owner Nada Semesta', '+6281200000003', 'eo'],
+            'eo2@stagetix.test' => ['Owner Riak Rock', '+6281200000004', 'eo'],
+            'gate1@stagetix.test' => ['Petugas Gate 1', '+6281200000005', 'customer'],
         ];
 
         // kolom role/status diisi hanya jika ada di tabel users
