@@ -6,6 +6,11 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+
+    /**
+     * Run the migrations.
+     */
+
     public function up(): void
     {
         Schema::create('notification_deliveries', function (Blueprint $table): void {
@@ -14,8 +19,8 @@ return new class extends Migration
             $table->foreignId('order_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('event_order_id')->nullable()->constrained('event_orders')->nullOnDelete();
             $table->string('event_key', 150);
-            $table->string('channel', 30); // broadcast|mail|whatsapp|database
-            $table->string('status', 20)->default('pending'); // pending|sent|failed
+            $table->string('channel', 30); 
+            $table->string('status', 20)->default('pending'); 
             $table->unsignedSmallInteger('attempts')->default(0);
             $table->json('payload')->nullable();
             $table->timestamps(6);
@@ -56,6 +61,10 @@ return new class extends Migration
             $table->index(['tenant_id', 'action']);
         });
     }
+
+     /**
+     * Reverse the migrations.
+     */
 
     public function down(): void
     {

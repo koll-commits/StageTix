@@ -7,6 +7,10 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+     /**
+     * Run the migrations.
+     */
+
     public function up(): void
     {
         Schema::create('orders', function (Blueprint $table): void {
@@ -15,9 +19,9 @@ return new class extends Migration
             $table->string('order_number', 30);
             $table->foreignId('user_id')->constrained()->restrictOnDelete(); // pembeli wajib login
             $table->foreignId('promo_code_id')->nullable()->constrained('promo_codes')->nullOnDelete();
-            $table->string('checkout_key', 100); // idempotensi checkout
-            $table->binary('tracking_token_hash', 32); // BINARY(32): hash token pelacakan publik
-            $table->string('status', 30)->default('draft'); // draft|pending_payment|paid|completed|cancelled|expired
+            $table->string('checkout_key', 100); 
+            $table->binary('tracking_token_hash', 32); 
+            $table->string('status', 30)->default('draft'); 
             $table->unsignedBigInteger('subtotal_amount')->default(0);
             $table->unsignedBigInteger('discount_amount')->default(0);
             $table->unsignedBigInteger('tax_amount')->default(0);
@@ -37,7 +41,7 @@ return new class extends Migration
             $table->unique('checkout_key');
             $table->unique('tracking_token_hash');
             $table->index(['user_id', 'status']);
-            $table->index(['status', 'payment_expires_at']); // job kedaluwarsa order
+            $table->index(['status', 'payment_expires_at']); 
         });
 
         Schema::create('event_orders', function (Blueprint $table): void {
@@ -55,8 +59,8 @@ return new class extends Migration
             $table->unsignedBigInteger('net_amount');
             $table->timestamps(6);
 
-            $table->unique(['order_id', 'tenant_id']); // satu event_order per EO per order
-            $table->unique(['tenant_id', 'id']); // target composite FK
+            $table->unique(['order_id', 'tenant_id']); 
+            $table->unique(['tenant_id', 'id']); 
             $table->index(['tenant_id', 'status']);
             $table->foreign(['tenant_id', 'commission_id'])
                 ->references(['tenant_id', 'id'])->on('commission_schemes')->restrictOnDelete();
@@ -76,7 +80,7 @@ return new class extends Migration
             $table->unsignedBigInteger('line_total');
             $table->timestamps(6);
 
-            $table->unique(['tenant_id', 'id']); // target composite FK tickets
+            $table->unique(['tenant_id', 'id']);
             $table->index(['tenant_id', 'event_order_id']);
             $table->index(['tenant_id', 'event_id']);
             $table->foreign(['tenant_id', 'event_order_id'])
@@ -104,13 +108,13 @@ return new class extends Migration
             $table->foreignId('holder_user_id')->constrained('users')->restrictOnDelete();
             $table->string('holder_name', 120);
             $table->string('qr_code', 64);
-            $table->string('status', 20)->default('issued'); // issued|checked_in|refunded|transferred
+            $table->string('status', 20)->default('issued'); 
             $table->dateTime('issued_at', 6);
             $table->dateTime('checked_in_at', 6)->nullable();
             $table->timestamps(6);
 
             $table->unique('qr_code');
-            $table->unique(['tenant_id', 'id']); // target composite FK ticket_checkins
+            $table->unique(['tenant_id', 'id']); 
             $table->index(['tenant_id', 'event_id', 'status']);
             $table->index(['holder_user_id', 'status']);
             $table->foreign(['tenant_id', 'event_id'])
@@ -153,6 +157,10 @@ return new class extends Migration
                 ->references(['tenant_id', 'id'])->on('ticket_categories')->restrictOnDelete();
         });
     }
+    
+     /**
+     * Reverse the migrations.
+     */
 
     public function down(): void
     {

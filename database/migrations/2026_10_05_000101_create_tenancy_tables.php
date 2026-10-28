@@ -7,6 +7,10 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+     /**
+     * Run the migrations.
+     */
+
     public function up(): void
     {
         Schema::create('tenants', function (Blueprint $table): void {
@@ -14,7 +18,7 @@ return new class extends Migration
             $table->string('code', 30)->unique();
             $table->string('slug', 100)->unique();
             $table->string('display_name', 120);
-            $table->string('status', 20)->default('pending'); // pending|active|suspended|inactive
+            $table->string('status', 20)->default('pending'); 
             $table->timestamps(6);
             $table->softDeletes('deleted_at', 6);
         });
@@ -22,7 +26,7 @@ return new class extends Migration
         Schema::create('tenant_balances', function (Blueprint $table): void {
             $table->foreignId('tenant_id')->primary()->constrained('tenants')->cascadeOnDelete();
             $table->unsignedBigInteger('available_amount')->default(0);
-            $table->unsignedBigInteger('held_amount')->default(0); // saldo tertahan (penarikan dana, FR-EO-07)
+            $table->unsignedBigInteger('held_amount')->default(0); 
             $table->timestamps(6);
         });
         DB::statement('ALTER TABLE tenant_balances ADD CONSTRAINT chk_tenant_balance_nonneg CHECK (available_amount >= 0 AND held_amount >= 0)');
@@ -69,6 +73,10 @@ return new class extends Migration
             $table->index(['tenant_id', 'user_id']);
         });
     }
+    
+     /**
+     * Reverse the migrations.
+     */
 
     public function down(): void
     {

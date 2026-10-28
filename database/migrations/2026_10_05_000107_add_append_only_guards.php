@@ -8,6 +8,10 @@ return new class extends Migration
     /** @var list<string> */
     private array $tables = ['payment_events', 'ledger_entries', 'audit_logs'];
 
+    /**
+     * Run the migrations.
+     */
+
     public function up(): void
     {
         foreach ($this->tables as $table) {
@@ -21,6 +25,10 @@ return new class extends Migration
             );
         }
     }
+
+     /**
+     * Reverse the migrations.
+     */
 
     public function down(): void
     {

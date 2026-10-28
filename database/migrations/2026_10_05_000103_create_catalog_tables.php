@@ -7,17 +7,21 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+     /**
+     * Run the migrations.
+     */
+
     public function up(): void
     {
         Schema::create('commission_schemes', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('tenant_id')->constrained('tenants')->cascadeOnDelete();
-            $table->decimal('commission_rate', 6, 4); // exact, mis. 0.1000 = 10%
+            $table->decimal('commission_rate', 6, 4); 
             $table->dateTime('valid_from', 6);
-            $table->dateTime('valid_to', 6)->nullable(); // null = masih berlaku
+            $table->dateTime('valid_to', 6)->nullable(); 
             $table->timestamps(6);
 
-            $table->unique(['tenant_id', 'id']); // target FK snapshot komisi
+            $table->unique(['tenant_id', 'id']); 
             $table->index(['tenant_id', 'valid_from']);
         });
         DB::statement('ALTER TABLE commission_schemes ADD CONSTRAINT chk_commission_rate CHECK (commission_rate >= 0 AND commission_rate <= 1)');
@@ -28,7 +32,7 @@ return new class extends Migration
             $table->foreignId('tenant_id')->constrained('tenants')->restrictOnDelete();
             $table->foreignId('venue_id')->constrained()->restrictOnDelete();
             $table->string('title', 150);
-            $table->string('slug', 160)->unique(); // URL katalog publik
+            $table->string('slug', 160)->unique(); 
             $table->string('genre', 40);
             $table->text('description')->nullable();
             $table->string('poster_path', 255)->nullable();
@@ -36,14 +40,14 @@ return new class extends Migration
             $table->dateTime('ends_at', 6)->nullable();
             $table->dateTime('sales_start_at', 6)->nullable();
             $table->dateTime('sales_end_at', 6)->nullable();
-            $table->unsignedSmallInteger('max_tickets_per_account')->default(4); // anti-scalping (FR-BUY-07)
-            $table->string('status', 20)->default('draft'); // draft|published|ongoing|finished|cancelled
+            $table->unsignedSmallInteger('max_tickets_per_account')->default(4); 
+            $table->string('status', 20)->default('draft'); 
             $table->timestamps(6);
             $table->softDeletes('deleted_at', 6);
 
-            $table->unique(['tenant_id', 'id']); // target composite FK
-            $table->index(['tenant_id', 'status', 'starts_at']); // NFR-DAT-03
-            $table->index(['status', 'starts_at']); // katalog publik
+            $table->unique(['tenant_id', 'id']); 
+            $table->index(['tenant_id', 'status', 'starts_at']); 
+            $table->index(['status', 'starts_at']); 
             $table->index(['genre', 'starts_at']);
         });
         DB::statement('ALTER TABLE events ADD CONSTRAINT chk_event_period CHECK (ends_at IS NULL OR ends_at > starts_at)');
@@ -58,7 +62,7 @@ return new class extends Migration
             $table->timestamps(6);
 
             $table->unique(['tenant_id', 'id']);
-            $table->unique(['tenant_id', 'event_id', 'id']); // target FK ticket_categories (tenant + event + area sama)
+            $table->unique(['tenant_id', 'event_id', 'id']); 
             $table->unique(['tenant_id', 'event_id', 'name']);
             // event harus milik EO yang sama
             $table->foreign(['tenant_id', 'event_id'])
@@ -135,21 +139,25 @@ return new class extends Migration
             $table->foreignId('tenant_id')->constrained('tenants')->restrictOnDelete();
             $table->unsignedBigInteger('ticket_category_id');
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->string('hold_key', 100); // idempotensi permintaan hold
+            $table->string('hold_key', 100);
             $table->unsignedSmallInteger('quantity');
-            $table->string('status', 20)->default('active'); // active|converted|released|expired
+            $table->string('status', 20)->default('active'); 
             $table->dateTime('expires_at', 6);
             $table->timestamps(6);
 
             $table->unique('hold_key');
             $table->unique(['tenant_id', 'id']);
-            $table->index(['status', 'expires_at']); // job pelepas hold kedaluwarsa
+            $table->index(['status', 'expires_at']); 
             $table->index(['tenant_id', 'ticket_category_id', 'status']);
             $table->foreign(['tenant_id', 'ticket_category_id'])
                 ->references(['tenant_id', 'id'])->on('ticket_categories')->restrictOnDelete();
         });
         DB::statement('ALTER TABLE area_holds ADD CONSTRAINT chk_hold_qty CHECK (quantity > 0)');
     }
+
+     /**
+     * Reverse the migrations.
+     */
 
     public function down(): void
     {

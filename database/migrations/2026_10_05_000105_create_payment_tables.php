@@ -7,15 +7,19 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+     /**
+     * Run the migrations.
+     */
+
     public function up(): void
     {
         Schema::create('payments', function (Blueprint $table): void {
             $table->id();
-            $table->foreignId('order_id')->constrained()->restrictOnDelete(); // satu transaksi QRIS per order induk
+            $table->foreignId('order_id')->constrained()->restrictOnDelete(); 
             $table->string('payment_reference', 100);
             $table->string('idempotency_key', 100);
             $table->unsignedBigInteger('amount');
-            $table->string('status', 30)->default('created'); // created|pending|settled|expired|denied
+            $table->string('status', 30)->default('created'); 
             $table->dateTime('expires_at', 6)->nullable();
             $table->dateTime('settled_at', 6)->nullable();
             $table->timestamps(6);
@@ -29,8 +33,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('payment_id')->constrained()->cascadeOnDelete();
             $table->string('provider_reference', 120);
-            $table->text('qris_payload')->nullable(); // string QRIS dinamis dari gateway
-            $table->string('status', 30)->default('created'); // created|pending|success|failed|expired
+            $table->text('qris_payload')->nullable(); 
+            $table->string('status', 30)->default('created'); 
             $table->dateTime('expires_at', 6)->nullable();
             $table->timestamps(6);
 
@@ -46,11 +50,11 @@ return new class extends Migration
             $table->string('provider_event_id', 150);
             $table->string('signature', 255)->nullable();
             $table->json('payload');
-            $table->string('result', 30); // verified|rejected|duplicate
+            $table->string('result', 30); 
             $table->dateTime('received_at', 6);
             $table->timestamps(6);
 
-            $table->unique('provider_event_id'); // guard replay / dedup webhook
+            $table->unique('provider_event_id'); 
             $table->index(['payment_id', 'result']);
         });
 
@@ -62,9 +66,9 @@ return new class extends Migration
             $table->foreignId('reviewed_by')->nullable()->constrained('users')->nullOnDelete();
             $table->string('idempotency_key', 100);
             $table->unsignedBigInteger('amount');
-            $table->string('status', 30)->default('pending'); // pending|approved|rejected|disbursed
-            $table->json('transfer_snapshot')->nullable(); // snapshot rekening saat diajukan
-            // diisi tenant_id saat aktif, NULL saat selesai (satu penarikan aktif per EO)
+            $table->string('status', 30)->default('pending'); 
+            $table->json('transfer_snapshot')->nullable(); 
+    
             $table->unsignedBigInteger('active_tenant_lock')->nullable();
             $table->timestamps(6);
 
@@ -81,14 +85,14 @@ return new class extends Migration
         Schema::create('ledger_entries', function (Blueprint $table): void {
             $table->id();
             $table->string('account', 20); // tenant|platform
-            $table->foreignId('tenant_id')->nullable()->constrained('tenants')->restrictOnDelete(); // null untuk akun platform
+            $table->foreignId('tenant_id')->nullable()->constrained('tenants')->restrictOnDelete(); 
             $table->foreignId('order_id')->nullable()->constrained()->restrictOnDelete();
             $table->foreignId('event_order_id')->nullable()->constrained('event_orders')->restrictOnDelete();
             $table->foreignId('payment_id')->nullable()->constrained()->restrictOnDelete();
             $table->foreignId('withdrawal_id')->nullable()->constrained()->restrictOnDelete();
             $table->foreignId('reversal_of_id')->nullable()->constrained('ledger_entries')->restrictOnDelete();
             $table->string('idempotency_key', 100);
-            $table->string('type', 40); // sale_credit|commission|tax|service_fee|hold|release|withdrawal_debit|reversal
+            $table->string('type', 40); 
             $table->bigInteger('available_delta')->default(0);
             $table->bigInteger('held_delta')->default(0);
             $table->timestamps(6);
@@ -100,6 +104,10 @@ return new class extends Migration
         });
         DB::statement("ALTER TABLE ledger_entries ADD CONSTRAINT chk_ledger_account CHECK ((account = 'tenant' AND tenant_id IS NOT NULL) OR account = 'platform')");
     }
+
+        /**
+        * Reverse the migrations.
+        */
 
     public function down(): void
     {

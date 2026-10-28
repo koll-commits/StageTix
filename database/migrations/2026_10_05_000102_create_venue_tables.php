@@ -6,6 +6,10 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+     /**
+     * Run the migrations.
+     */
+
     public function up(): void
     {
         Schema::create('venues', function (Blueprint $table): void {
@@ -14,12 +18,12 @@ return new class extends Migration
             $table->string('city', 80);
             $table->string('address', 255)->nullable();
             $table->unsignedInteger('capacity');
-            $table->string('layout_type', 30)->default('hall'); // hall|outdoor|stadium|arena
-            $table->string('status', 20)->default('active'); // active|inactive
+            $table->string('layout_type', 30)->default('hall'); 
+            $table->string('status', 20)->default('active'); 
             $table->timestamps(6);
 
             $table->unique(['name', 'city']);
-            $table->index(['city', 'status']); // filter katalog per kota (FR-BUY-01)
+            $table->index(['city', 'status']); 
         });
 
         Schema::create('gates', function (Blueprint $table): void {
@@ -45,6 +49,10 @@ return new class extends Migration
             $table->unique(['venue_id', 'name']);
         });
     }
+
+        /**
+        * Reverse the migrations.
+        */
 
     public function down(): void
     {
