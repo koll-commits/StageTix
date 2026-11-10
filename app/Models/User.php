@@ -6,6 +6,7 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -26,8 +27,6 @@ class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
-
-    protected $hidden = [ 'password', 'remember_token', ];
     /**
      * Get the attributes that should be cast.
      *
@@ -68,5 +67,25 @@ class User extends Authenticatable
     public function isActive(): bool
     {
         return $this->status === 'active';
+    }
+}
+    public function tenantRoles(): HasMany
+    {
+        return $this->hasMany(UserTenantRole::class);
+    }
+
+    public function platformRoles(): HasMany
+    {
+        return $this->hasMany(UserPlatformRole::class);
+    }
+
+    public function orders(): HasMany
+    {
+        return $this->hasMany(Order::class);
+    }
+
+    public function tickets(): HasMany
+    {
+        return $this->hasMany(Ticket::class, 'holder_user_id');
     }
 }
