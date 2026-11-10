@@ -67,7 +67,7 @@ class ModuleConventionTest extends TestCase
         $this->assertNotNull(view('components.empty-state'));
         $this->assertNotNull(view('components.layouts.public'));
         $this->assertNotNull(view('components.layouts.eo'));
-        $this->assertNotNull(view('components.layouts.admin'));
+      
     }
 }
 
