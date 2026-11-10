@@ -24,7 +24,7 @@ return new class extends Migration
         });
 
         Schema::create('tenant_balances', function (Blueprint $table): void {
-            $table->foreignId('tenant_id')->primary()->constrained('tenants')->cascadeOnDelete();
+            $table->foreignId('eo_id')->primary()->constrained('tenants')->cascadeOnDelete();
             $table->unsignedBigInteger('available_amount')->default(0);
             $table->unsignedBigInteger('held_amount')->default(0); 
             $table->timestamps(6);
@@ -33,7 +33,7 @@ return new class extends Migration
 
         Schema::create('tenant_bank_accounts', function (Blueprint $table): void {
             $table->id();
-            $table->foreignId('tenant_id')->constrained('tenants')->cascadeOnDelete();
+            $table->foreignId('eo_id')->constrained('tenants')->cascadeOnDelete();
             $table->foreignId('verified_by')->nullable()->constrained('users')->nullOnDelete();
             $table->text('account_number_cipher'); // terenkripsi (cast encrypted)
             $table->string('account_last4', 4);
@@ -43,7 +43,7 @@ return new class extends Migration
             $table->boolean('is_primary')->default(false);
             $table->timestamps(6);
 
-            $table->unique(['tenant_id', 'id']); // target composite FK withdrawals
+            $table->unique(['eo_id', 'id']); // target composite FK withdrawals
         });
 
         // tambahan kolom untuk login dengan telepon
@@ -65,12 +65,12 @@ return new class extends Migration
         Schema::create('user_tenant_roles', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('tenant_id')->constrained('tenants')->cascadeOnDelete();
+            $table->foreignId('eo_id')->constrained('tenants')->cascadeOnDelete();
             $table->string('role', 30); // owner|operator|gate_staff
             $table->timestamps(6);
 
-            $table->unique(['user_id', 'tenant_id', 'role']);
-            $table->index(['tenant_id', 'user_id']);
+            $table->unique(['user_id', 'eo_id', 'role']);
+            $table->index(['eo_id', 'user_id']);
         });
     }
     

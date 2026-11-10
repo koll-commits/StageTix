@@ -29,7 +29,7 @@ class DatabaseConstraintTest extends TestCase
         $this->expectException(QueryException::class);
         TicketCategory::factory()->create([
             'event_id' => $eventA->id,
-            'tenant_id' => $eventA->tenant_id,
+            'eo_id' => $eventA->eo_id,
             'area_id' => $areaB->id, // area milik EO lain -> composite FK gagal (1452)
         ]);
     }
@@ -37,14 +37,14 @@ class DatabaseConstraintTest extends TestCase
     public function test_ticket_category_cannot_use_area_of_another_event_in_same_tenant(): void
     {
         $tenant = Tenant::factory()->create();
-        $event1 = Event::factory()->create(['tenant_id' => $tenant->id]);
-        $event2 = Event::factory()->create(['tenant_id' => $tenant->id]);
+        $event1 = Event::factory()->create(['eo_id' => $tenant->id]);
+        $event2 = Event::factory()->create(['eo_id' => $tenant->id]);
         $area2 = TicketArea::factory()->create(['event_id' => $event2->id]);
 
         $this->expectException(QueryException::class);
         TicketCategory::factory()->create([
             'event_id' => $event1->id,
-            'tenant_id' => $tenant->id,
+            'eo_id' => $tenant->id,
             'area_id' => $area2->id, // tenant sama, event beda -> ditolak
         ]);
     }
@@ -53,11 +53,11 @@ class DatabaseConstraintTest extends TestCase
     {
         $tenantA = Tenant::factory()->create();
         $tenantB = Tenant::factory()->create();
-        $eventB = Event::factory()->create(['tenant_id' => $tenantB->id]);
+        $eventB = Event::factory()->create(['eo_id' => $tenantB->id]);
 
         $this->expectException(QueryException::class);
         // Area mengaku milik tenant A tetapi menunjuk event milik tenant B.
-        TicketArea::factory()->create(['tenant_id' => $tenantA->id, 'event_id' => $eventB->id]);
+        TicketArea::factory()->create(['eo_id' => $tenantA->id, 'event_id' => $eventB->id]);
     }
 
     public function test_duplicate_tenant_code_is_rejected(): void
@@ -76,19 +76,19 @@ class DatabaseConstraintTest extends TestCase
 
     public function test_orders_has_no_eo_id_and_supports_multiple_event_orders(): void
     {
-        $this->assertFalse(Schema::hasColumn('orders', 'tenant_id'), 'orders TIDAK boleh punya tenant_id');
+        $this->assertFalse(Schema::hasColumn('orders', 'eo_id'), 'orders TIDAK boleh punya eo_id');
 
         $buyer = User::factory()->create();
         $a = Tenant::factory()->create();
         $b = Tenant::factory()->create();
-        $ca = CommissionScheme::factory()->create(['tenant_id' => $a->id]);
-        $cb = CommissionScheme::factory()->create(['tenant_id' => $b->id]);
+        $ca = CommissionScheme::factory()->create(['eo_id' => $a->id]);
+        $cb = CommissionScheme::factory()->create(['eo_id' => $b->id]);
 
         $orderId = $this->insertOrder($buyer, 'ORD-1', 'ck-1');
 
         foreach ([[$a, $ca], [$b, $cb]] as [$tenant, $commission]) {
             DB::table('event_orders')->insert([
-                'order_id' => $orderId, 'tenant_id' => $tenant->id, 'commission_id' => $commission->id,
+                'order_id' => $orderId, 'eo_id' => $tenant->id, 'commission_id' => $commission->id,
                 'status' => 'pending', 'commission_rate_snapshot' => 0.1000,
                 'subtotal_amount' => 250000, 'commission_amount' => 25000, 'net_amount' => 225000,
                 'created_at' => now(), 'updated_at' => now(),
@@ -101,7 +101,7 @@ class DatabaseConstraintTest extends TestCase
         // Tetapi hanya SATU event_order per EO per order (NFR-DAT-07).
         $this->expectException(QueryException::class);
         DB::table('event_orders')->insert([
-            'order_id' => $orderId, 'tenant_id' => $a->id, 'commission_id' => $ca->id,
+            'order_id' => $orderId, 'eo_id' => $a->id, 'commission_id' => $ca->id,
             'status' => 'pending', 'commission_rate_snapshot' => 0.1000,
             'subtotal_amount' => 1, 'commission_amount' => 0, 'net_amount' => 1,
             'created_at' => now(), 'updated_at' => now(),
@@ -113,12 +113,12 @@ class DatabaseConstraintTest extends TestCase
         $buyer = User::factory()->create();
         $a = Tenant::factory()->create();
         $b = Tenant::factory()->create();
-        $commissionB = CommissionScheme::factory()->create(['tenant_id' => $b->id]);
+        $commissionB = CommissionScheme::factory()->create(['eo_id' => $b->id]);
         $orderId = $this->insertOrder($buyer, 'ORD-2', 'ck-2');
 
         $this->expectException(QueryException::class);
         DB::table('event_orders')->insert([
-            'order_id' => $orderId, 'tenant_id' => $a->id, 'commission_id' => $commissionB->id,
+            'order_id' => $orderId, 'eo_id' => $a->id, 'commission_id' => $commissionB->id,
             'status' => 'pending', 'commission_rate_snapshot' => 0.1000,
             'subtotal_amount' => 1, 'commission_amount' => 0, 'net_amount' => 1,
             'created_at' => now(), 'updated_at' => now(),
@@ -130,7 +130,7 @@ class DatabaseConstraintTest extends TestCase
         [$tenantId, $eventId, $itemId, $holderId] = $this->seedOrderItem();
 
         $row = fn () => [
-            'tenant_id' => $tenantId, 'event_id' => $eventId, 'order_item_id' => $itemId,
+            'eo_id' => $tenantId, 'event_id' => $eventId, 'order_item_id' => $itemId,
             'holder_user_id' => $holderId, 'holder_name' => 'Pembeli', 'qr_code' => 'QR-SAMA',
             'status' => 'issued', 'issued_at' => now(), 'created_at' => now(), 'updated_at' => now(),
         ];
@@ -149,13 +149,13 @@ class DatabaseConstraintTest extends TestCase
         $scanner = User::factory()->create();
 
         $ticketId = DB::table('tickets')->insertGetId([
-            'tenant_id' => $tenantId, 'event_id' => $eventId, 'order_item_id' => $itemId,
+            'eo_id' => $tenantId, 'event_id' => $eventId, 'order_item_id' => $itemId,
             'holder_user_id' => $holderId, 'holder_name' => 'Pembeli', 'qr_code' => Str::random(48),
             'status' => 'issued', 'issued_at' => now(), 'created_at' => now(), 'updated_at' => now(),
         ]);
 
         $checkin = fn (int $gateId) => [
-            'tenant_id' => $tenantId, 'ticket_id' => $ticketId, 'gate_id' => $gateId,
+            'eo_id' => $tenantId, 'ticket_id' => $ticketId, 'gate_id' => $gateId,
             'scanned_by' => $scanner->id, 'scanned_at' => now(), 'created_at' => now(), 'updated_at' => now(),
         ];
         DB::table('ticket_checkins')->insert($checkin($gate1->id));
@@ -188,7 +188,7 @@ class DatabaseConstraintTest extends TestCase
     {
         $tenant = Tenant::factory()->create();
         $id = DB::table('ledger_entries')->insertGetId([
-            'account' => 'tenant', 'tenant_id' => $tenant->id, 'idempotency_key' => 'led-1',
+            'account' => 'tenant', 'eo_id' => $tenant->id, 'idempotency_key' => 'led-1',
             'type' => 'sale_credit', 'available_delta' => 225000, 'held_delta' => 0,
             'created_at' => now(), 'updated_at' => now(),
         ]);
@@ -208,7 +208,7 @@ class DatabaseConstraintTest extends TestCase
     {
         $this->expectException(QueryException::class);
         DB::table('ledger_entries')->insert([
-            'account' => 'tenant', 'tenant_id' => null, 'idempotency_key' => 'led-2',
+            'account' => 'tenant', 'eo_id' => null, 'idempotency_key' => 'led-2',
             'type' => 'sale_credit', 'available_delta' => 1, 'held_delta' => 0,
             'created_at' => now(), 'updated_at' => now(),
         ]);
@@ -217,12 +217,12 @@ class DatabaseConstraintTest extends TestCase
     public function test_gate_staff_can_have_only_one_active_event_assignment(): void
     {
         $tenant = Tenant::factory()->create();
-        $event1 = Event::factory()->create(['tenant_id' => $tenant->id]);
-        $event2 = Event::factory()->create(['tenant_id' => $tenant->id]);
+        $event1 = Event::factory()->create(['eo_id' => $tenant->id]);
+        $event2 = Event::factory()->create(['eo_id' => $tenant->id]);
         $staff = User::factory()->create();
 
         $assign = fn (Event $event, ?int $lock) => [
-            'tenant_id' => $tenant->id, 'user_id' => $staff->id, 'event_id' => $event->id,
+            'eo_id' => $tenant->id, 'user_id' => $staff->id, 'event_id' => $event->id,
             'active_user_lock' => $lock, 'created_at' => now(), 'updated_at' => now(),
         ];
 
@@ -231,7 +231,7 @@ class DatabaseConstraintTest extends TestCase
         DB::table('event_staff_assignments')->insert($assign($event2, null));
         $this->assertSame(2, DB::table('event_staff_assignments')->where('user_id', $staff->id)->count());
 
-        $event3 = Event::factory()->create(['tenant_id' => $tenant->id]);
+        $event3 = Event::factory()->create(['eo_id' => $tenant->id]);
         $this->expectException(QueryException::class);
         DB::table('event_staff_assignments')->insert($assign($event3, $staff->id)); // event aktif kedua ditolak
     }
@@ -258,28 +258,28 @@ class DatabaseConstraintTest extends TestCase
         ]);
     }
 
-    /** @return array{0:int,1:int,2:int,3:int} [tenant_id, event_id, order_item_id, holder_user_id] */
+    /** @return array{0:int,1:int,2:int,3:int} [eo_id, event_id, order_item_id, holder_user_id] */
     private function seedOrderItem(): array
     {
         $buyer = User::factory()->create();
         $category = TicketCategory::factory()->create();
-        $commission = CommissionScheme::factory()->create(['tenant_id' => $category->tenant_id]);
+        $commission = CommissionScheme::factory()->create(['eo_id' => $category->eo_id]);
         $orderId = $this->insertOrder($buyer, 'ORD-'.Str::random(6), 'ck-'.Str::random(8));
 
         $eventOrderId = DB::table('event_orders')->insertGetId([
-            'order_id' => $orderId, 'tenant_id' => $category->tenant_id, 'commission_id' => $commission->id,
+            'order_id' => $orderId, 'eo_id' => $category->eo_id, 'commission_id' => $commission->id,
             'status' => 'paid', 'commission_rate_snapshot' => 0.1000,
             'subtotal_amount' => $category->price_amount, 'commission_amount' => 0, 'net_amount' => $category->price_amount,
             'created_at' => now(), 'updated_at' => now(),
         ]);
 
         $itemId = DB::table('order_items')->insertGetId([
-            'tenant_id' => $category->tenant_id, 'event_order_id' => $eventOrderId, 'event_id' => $category->event_id,
+            'eo_id' => $category->eo_id, 'event_order_id' => $eventOrderId, 'event_id' => $category->event_id,
             'ticket_category_id' => $category->id, 'event_title_snapshot' => 'Event', 'category_name_snapshot' => 'Kategori',
             'area_name_snapshot' => 'Area', 'unit_price_snapshot' => $category->price_amount, 'quantity' => 1,
             'line_total' => $category->price_amount, 'created_at' => now(), 'updated_at' => now(),
         ]);
 
-        return [$category->tenant_id, $category->event_id, $itemId, $buyer->id];
+        return [$category->eo_id, $category->event_id, $itemId, $buyer->id];
     }
 }

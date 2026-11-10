@@ -30,7 +30,7 @@ return new class extends Migration
 
         Schema::create('outbox_events', function (Blueprint $table): void {
             $table->id();
-            $table->foreignId('tenant_id')->nullable()->constrained('tenants')->nullOnDelete();
+            $table->foreignId('eo_id')->nullable()->constrained('tenants')->nullOnDelete();
             $table->string('event_key', 150);
             $table->string('aggregate_type', 80);
             $table->string('aggregate_id', 64);
@@ -46,7 +46,7 @@ return new class extends Migration
         Schema::create('audit_logs', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('actor_id')->nullable()->constrained('users')->nullOnDelete();
-            $table->foreignId('tenant_id')->nullable()->constrained('tenants')->nullOnDelete();
+            $table->foreignId('eo_id')->nullable()->constrained('tenants')->nullOnDelete();
             $table->string('entity', 80);
             $table->string('entity_id', 64)->nullable();
             $table->string('action', 60); // mis. commission.changed, withdrawal.approved, ticket.checked_in
@@ -58,7 +58,7 @@ return new class extends Migration
             $table->timestamps(6);
 
             $table->index(['entity', 'entity_id']);
-            $table->index(['tenant_id', 'action']);
+            $table->index(['eo_id', 'action']);
         });
     }
 

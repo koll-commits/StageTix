@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Tenant;
 use App\Models\User;
 use App\Modules\Catalog\CatalogServiceProvider;
 use App\Modules\Gate\GateServiceProvider;
@@ -33,6 +34,19 @@ class ModularFoundationTest extends TestCase
 
     }
 
+    private function tenantFor(User $user, string $role = 'owner'): Tenant
+    {
+        $tenant = Tenant::factory()->create(['slug' => 'demo', 'status' => 'active']);
+
+        $user->tenantRoles()->forceCreate([
+            'user_id' => $user->id,
+            'eo_id' => $tenant->id,
+            'role' => $role,
+        ]);
+
+        return $tenant;
+    }
+
     public function test_customer_route_is_public(): void
     {
         $this->get(route('customer.home'))->assertOk();
@@ -44,11 +58,18 @@ class ModularFoundationTest extends TestCase
         $this->get(route('admin.dashboard'))->assertRedirect(route('login'));
     }
 
+   
     public function test_eo_operator_can_open_eo_dashboard(): void
     {
-        $this->actingAs($this->user('eo'));
-        $this->get(route('eo.dashboard', ['eo' => 'demo']))->assertOk();
+         $this->withoutVite();
+
+         $user = $this->user('eo');
+         $this->tenantFor($user);
+
+         $this->actingAs($user);
+         $this->get(route('eo.dashboard', ['eo' => 'demo']))->assertOk();
     }
+    
     
     public function test_admin_can_open_admin_dashboard(): void
     {

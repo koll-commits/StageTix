@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class TenantBalance extends Model
 {
-    protected $primaryKey = 'tenant_id';
+    protected $primaryKey = 'eo_id';
 
     public $incrementing = false;
 
@@ -25,6 +25,6 @@ class TenantBalance extends Model
     /** @return BelongsTo<Tenant, $this> */
     public function tenant(): BelongsTo
     {
-        return $this->belongsTo(Tenant::class);
+        return $this->belongsTo(Tenant::class, 'eo_id');
     }
 }

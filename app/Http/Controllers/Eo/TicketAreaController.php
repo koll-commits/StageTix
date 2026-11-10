@@ -17,12 +17,12 @@ class TicketAreaController extends Controller
 
         $data = $request->validateWithBag('area', [
             'name' => ['required', 'string', 'max:80',
-                Rule::unique('ticket_areas', 'name')->where('tenant_id', $tenant->id)->where('event_id', $event->id)],
+                Rule::unique('ticket_areas', 'name')->where('eo_id', $tenant->id)->where('event_id', $event->id)],
             'capacity' => ['required', 'integer', 'min:1', 'max:'.($event->venue->capacity ?? 1000000)],
         ]);
 
         $area = new TicketArea($data);
-        $area->tenant_id = $tenant->id;
+        $area->eo_id = $tenant->id;
         $area->event_id = $event->id;
         $area->save();
 

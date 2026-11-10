@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
- * Order induk — platform-scoped (TANPA tenant_id): satu checkout bisa lintas EO (ADR-04).
+ * Order induk — platform-scoped (TANPA eo_id): satu checkout bisa lintas EO (ADR-04).
  */
 class Order extends Model
 {

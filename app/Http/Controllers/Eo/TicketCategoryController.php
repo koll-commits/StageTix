@@ -19,8 +19,8 @@ class TicketCategoryController extends Controller
 
         $data = $request->validateWithBag('category', [
             'name' => ['required', 'string', 'max:120',
-                Rule::unique('ticket_categories', 'name')->where('tenant_id', $tenant->id)->where('event_id', $event->id)],
-            'area_id' => ['required', Rule::exists('ticket_areas', 'id')->where('tenant_id', $tenant->id)->where('event_id', $event->id)],
+                Rule::unique('ticket_categories', 'name')->where('eo_id', $tenant->id)->where('event_id', $event->id)],
+            'area_id' => ['required', Rule::exists('ticket_areas', 'id')->where('eo_id', $tenant->id)->where('event_id', $event->id)],
             'price_amount' => ['required', 'integer', 'min:0', 'max:100000000'],
             'quota' => ['required', 'integer', 'min:1'],
         ]);
@@ -29,7 +29,7 @@ class TicketCategoryController extends Controller
         $this->assertWithinCapacity($area, (int) $data['quota'], null);
 
         $category = new TicketCategory($data);
-        $category->tenant_id = $tenant->id;
+        $category->eo_id = $tenant->id;
         $category->event_id = $event->id;
         $category->sort_order = $event->ticketCategories()->count() + 1;
         $category->save();
@@ -40,11 +40,11 @@ class TicketCategoryController extends Controller
     public function update(Request $request, int $category): RedirectResponse
     {
         $tenant = $request->attributes->get('tenant');
-        $category = TicketCategory::where('tenant_id', $tenant->id)->findOrFail($category);
+        $category = TicketCategory::where('eo_id', $tenant->id)->findOrFail($category);
 
         $data = $request->validateWithBag('category', [
             'name' => ['required', 'string', 'max:120',
-                Rule::unique('ticket_categories', 'name')->where('tenant_id', $tenant->id)
+                Rule::unique('ticket_categories', 'name')->where('eo_id', $tenant->id)
                     ->where('event_id', $category->event_id)->ignore($category->id)],
             'price_amount' => ['required', 'integer', 'min:0', 'max:100000000'],
             'quota' => ['required', 'integer', 'min:'.max(1, $category->sold_qty)],
@@ -66,7 +66,7 @@ class TicketCategoryController extends Controller
     /** Sakelar sold out satu langkah (FR-EO-03). */
     public function toggleSoldOut(Request $request, int $category): RedirectResponse
     {
-        $category = TicketCategory::where('tenant_id', $request->attributes->get('tenant')->id)->findOrFail($category);
+        $category = TicketCategory::where('eo_id', $request->attributes->get('tenant')->id)->findOrFail($category);
 
         if ($category->is_sold_out && $category->sold_qty >= $category->quota) {
             return back()->with('error', 'Kuota "'.$category->name.'" memang sudah habis terjual.');

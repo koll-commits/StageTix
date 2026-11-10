@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class UserTenantRole extends Model
 {
-    protected $fillable = ['user_id', 'tenant_id', 'role'];
+    protected $fillable = ['user_id', 'eo_id', 'role'];
 
     /** @return BelongsTo<User, $this> */
     public function user(): BelongsTo
@@ -21,6 +21,6 @@ class UserTenantRole extends Model
     /** @return BelongsTo<Tenant, $this> */
     public function tenant(): BelongsTo
     {
-        return $this->belongsTo(Tenant::class);
+        return $this->belongsTo(Tenant::class, 'eo_id');
     }
 }

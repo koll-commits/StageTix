@@ -19,7 +19,7 @@ class ResolveEoTenant
     {
         $tenant = Tenant::where('slug', (string) $request->route('eo'))->first();
         $role = $tenant
-            ? $request->user()->tenantRoles()->where('tenant_id', $tenant->id)->value('role')
+            ? $request->user()->tenantRoles()->where('eo_id', $tenant->id)->value('role')
             : null;
 
         abort_unless($tenant && $role, 404);

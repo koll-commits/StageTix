@@ -14,11 +14,11 @@ class ReportController extends Controller
     {
         $tenant = $request->attributes->get('tenant');
 
-        $paid = EventOrder::where('tenant_id', $tenant->id)->whereIn('status', ['paid', 'completed']);
+        $paid = EventOrder::where('eo_id', $tenant->id)->whereIn('status', ['paid', 'completed']);
 
         $perEvent = OrderItem::query()
             ->join('event_orders', 'event_orders.id', '=', 'order_items.event_order_id')
-            ->where('order_items.tenant_id', $tenant->id)
+            ->where('order_items.eo_id', $tenant->id)
             ->whereIn('event_orders.status', ['paid', 'completed'])
             ->groupBy('order_items.event_id', 'order_items.event_title_snapshot')
             ->selectRaw('order_items.event_id, order_items.event_title_snapshot as title, SUM(order_items.quantity) as tickets, SUM(order_items.line_total) as gross')

@@ -13,7 +13,7 @@ class PromoCodeFactory extends Factory
     public function definition(): array
     {
         return [
-            'tenant_id' => null, // promo platform
+            'eo_id' => null, // promo platform
             'code' => strtoupper(Str::random(8)),
             'discount_type' => 'percent',
             'discount_value' => 10,

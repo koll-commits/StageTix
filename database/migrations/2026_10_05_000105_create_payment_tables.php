@@ -60,7 +60,7 @@ return new class extends Migration
 
         Schema::create('withdrawals', function (Blueprint $table): void {
             $table->id();
-            $table->foreignId('tenant_id')->constrained('tenants')->restrictOnDelete();
+            $table->foreignId('eo_id')->constrained('tenants')->restrictOnDelete();
             $table->unsignedBigInteger('bank_account_id');
             $table->foreignId('requested_by')->constrained('users')->restrictOnDelete();
             $table->foreignId('reviewed_by')->nullable()->constrained('users')->nullOnDelete();
@@ -74,10 +74,10 @@ return new class extends Migration
 
             $table->unique('idempotency_key');
             $table->unique('active_tenant_lock');
-            $table->index(['tenant_id', 'status']);
+            $table->index(['eo_id', 'status']);
             // rekening harus milik EO yang sama
-            $table->foreign(['tenant_id', 'bank_account_id'])
-                ->references(['tenant_id', 'id'])->on('tenant_bank_accounts')->restrictOnDelete();
+            $table->foreign(['eo_id', 'bank_account_id'])
+                ->references(['eo_id', 'id'])->on('tenant_bank_accounts')->restrictOnDelete();
         });
         DB::statement('ALTER TABLE withdrawals ADD CONSTRAINT chk_withdrawal_amount CHECK (amount > 0)');
 
@@ -85,7 +85,7 @@ return new class extends Migration
         Schema::create('ledger_entries', function (Blueprint $table): void {
             $table->id();
             $table->string('account', 20); // tenant|platform
-            $table->foreignId('tenant_id')->nullable()->constrained('tenants')->restrictOnDelete(); 
+            $table->foreignId('eo_id')->nullable()->constrained('tenants')->restrictOnDelete(); 
             $table->foreignId('order_id')->nullable()->constrained()->restrictOnDelete();
             $table->foreignId('event_order_id')->nullable()->constrained('event_orders')->restrictOnDelete();
             $table->foreignId('payment_id')->nullable()->constrained()->restrictOnDelete();
@@ -98,11 +98,11 @@ return new class extends Migration
             $table->timestamps(6);
 
             $table->unique('idempotency_key');
-            $table->index(['tenant_id', 'type']);
+            $table->index(['eo_id', 'type']);
             $table->index(['account', 'type']);
             $table->index('payment_id');
         });
-        DB::statement("ALTER TABLE ledger_entries ADD CONSTRAINT chk_ledger_account CHECK ((account = 'tenant' AND tenant_id IS NOT NULL) OR account = 'platform')");
+        DB::statement("ALTER TABLE ledger_entries ADD CONSTRAINT chk_ledger_account CHECK ((account = 'tenant' AND eo_id IS NOT NULL) OR account = 'platform')");
     }
 
         /**

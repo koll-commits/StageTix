@@ -18,7 +18,7 @@ class EventFactory extends Factory
         $start = Carbon::create(2027, 1, 15, 19, 0, 0, 'UTC');
 
         return [
-            'tenant_id' => Tenant::factory(),
+            'eo_id' => Tenant::factory(),
             'venue_id' => Venue::factory(),
             'title' => $title,
             'slug' => Str::slug($title).'-'.Str::lower(Str::random(4)),

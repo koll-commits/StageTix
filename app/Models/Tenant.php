@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
- * Tenant = Event Organizer (EO). tenant_id pada model anak di-set eksplisit (bukan dari request).
+ * Tenant = Event Organizer (EO). eo_id pada model anak di-set eksplisit (bukan dari request).
  */
 class Tenant extends Model
 {
@@ -22,31 +22,31 @@ class Tenant extends Model
     /** @return HasOne<TenantBalance, $this> */
     public function balance(): HasOne
     {
-        return $this->hasOne(TenantBalance::class);
+        return $this->hasOne(TenantBalance::class, 'eo_id');
     }
 
     /** @return HasMany<TenantBankAccount, $this> */
     public function bankAccounts(): HasMany
     {
-        return $this->hasMany(TenantBankAccount::class);
+        return $this->hasMany(TenantBankAccount::class, 'eo_id');
     }
 
     /** @return HasMany<Event, $this> */
     public function events(): HasMany
     {
-        return $this->hasMany(Event::class);
+        return $this->hasMany(Event::class, 'eo_id');
     }
 
     /** @return HasMany<CommissionScheme, $this> */
     public function commissionSchemes(): HasMany
     {
-        return $this->hasMany(CommissionScheme::class);
+        return $this->hasMany(CommissionScheme::class, 'eo_id');
     }
 
     /** @return HasMany<UserTenantRole, $this> */
     public function roles(): HasMany
     {
-        return $this->hasMany(UserTenantRole::class);
+        return $this->hasMany(UserTenantRole::class, 'eo_id');
     }
 
     public function isActive(): bool

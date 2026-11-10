@@ -47,7 +47,7 @@ return new class extends Migration
         Schema::create('event_orders', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('order_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('tenant_id')->constrained('tenants')->restrictOnDelete();
+            $table->foreignId('eo_id')->constrained('tenants')->restrictOnDelete();
             $table->unsignedBigInteger('commission_id');
             $table->string('status', 30)->default('pending'); // pending|paid|completed|cancelled
             $table->decimal('commission_rate_snapshot', 6, 4);
@@ -59,16 +59,16 @@ return new class extends Migration
             $table->unsignedBigInteger('net_amount');
             $table->timestamps(6);
 
-            $table->unique(['order_id', 'tenant_id']); 
-            $table->unique(['tenant_id', 'id']); 
-            $table->index(['tenant_id', 'status']);
-            $table->foreign(['tenant_id', 'commission_id'])
-                ->references(['tenant_id', 'id'])->on('commission_schemes')->restrictOnDelete();
+            $table->unique(['order_id', 'eo_id']); 
+            $table->unique(['eo_id', 'id']); 
+            $table->index(['eo_id', 'status']);
+            $table->foreign(['eo_id', 'commission_id'])
+                ->references(['eo_id', 'id'])->on('commission_schemes')->restrictOnDelete();
         });
 
         Schema::create('order_items', function (Blueprint $table): void {
             $table->id();
-            $table->foreignId('tenant_id')->constrained('tenants')->restrictOnDelete();
+            $table->foreignId('eo_id')->constrained('tenants')->restrictOnDelete();
             $table->unsignedBigInteger('event_order_id');
             $table->unsignedBigInteger('event_id');
             $table->unsignedBigInteger('ticket_category_id');
@@ -80,29 +80,29 @@ return new class extends Migration
             $table->unsignedBigInteger('line_total');
             $table->timestamps(6);
 
-            $table->unique(['tenant_id', 'id']);
-            $table->index(['tenant_id', 'event_order_id']);
-            $table->index(['tenant_id', 'event_id']);
-            $table->foreign(['tenant_id', 'event_order_id'])
-                ->references(['tenant_id', 'id'])->on('event_orders')->cascadeOnDelete();
-            $table->foreign(['tenant_id', 'event_id'])
-                ->references(['tenant_id', 'id'])->on('events')->restrictOnDelete();
-            $table->foreign(['tenant_id', 'ticket_category_id'])
-                ->references(['tenant_id', 'id'])->on('ticket_categories')->restrictOnDelete();
+            $table->unique(['eo_id', 'id']);
+            $table->index(['eo_id', 'event_order_id']);
+            $table->index(['eo_id', 'event_id']);
+            $table->foreign(['eo_id', 'event_order_id'])
+                ->references(['eo_id', 'id'])->on('event_orders')->cascadeOnDelete();
+            $table->foreign(['eo_id', 'event_id'])
+                ->references(['eo_id', 'id'])->on('events')->restrictOnDelete();
+            $table->foreign(['eo_id', 'ticket_category_id'])
+                ->references(['eo_id', 'id'])->on('ticket_categories')->restrictOnDelete();
         });
         DB::statement('ALTER TABLE order_items ADD CONSTRAINT chk_order_item_qty CHECK (quantity > 0)');
 
         // hold terhubung ke event_order
         Schema::table('area_holds', function (Blueprint $table): void {
             $table->unsignedBigInteger('event_order_id')->nullable()->after('status');
-            $table->foreign(['tenant_id', 'event_order_id'])
-                ->references(['tenant_id', 'id'])->on('event_orders')->restrictOnDelete();
+            $table->foreign(['eo_id', 'event_order_id'])
+                ->references(['eo_id', 'id'])->on('event_orders')->restrictOnDelete();
         });
 
         // qr_code: token acak, unik global
         Schema::create('tickets', function (Blueprint $table): void {
             $table->id();
-            $table->foreignId('tenant_id')->constrained('tenants')->restrictOnDelete();
+            $table->foreignId('eo_id')->constrained('tenants')->restrictOnDelete();
             $table->unsignedBigInteger('event_id');
             $table->unsignedBigInteger('order_item_id');
             $table->foreignId('holder_user_id')->constrained('users')->restrictOnDelete();
@@ -114,19 +114,19 @@ return new class extends Migration
             $table->timestamps(6);
 
             $table->unique('qr_code');
-            $table->unique(['tenant_id', 'id']); 
-            $table->index(['tenant_id', 'event_id', 'status']);
+            $table->unique(['eo_id', 'id']); 
+            $table->index(['eo_id', 'event_id', 'status']);
             $table->index(['holder_user_id', 'status']);
-            $table->foreign(['tenant_id', 'event_id'])
-                ->references(['tenant_id', 'id'])->on('events')->restrictOnDelete();
-            $table->foreign(['tenant_id', 'order_item_id'])
-                ->references(['tenant_id', 'id'])->on('order_items')->restrictOnDelete();
+            $table->foreign(['eo_id', 'event_id'])
+                ->references(['eo_id', 'id'])->on('events')->restrictOnDelete();
+            $table->foreign(['eo_id', 'order_item_id'])
+                ->references(['eo_id', 'id'])->on('order_items')->restrictOnDelete();
         });
 
         // satu tiket hanya bisa check-in sekali
         Schema::create('ticket_checkins', function (Blueprint $table): void {
             $table->id();
-            $table->foreignId('tenant_id')->constrained('tenants')->restrictOnDelete();
+            $table->foreignId('eo_id')->constrained('tenants')->restrictOnDelete();
             $table->unsignedBigInteger('ticket_id');
             $table->foreignId('gate_id')->constrained('gates')->restrictOnDelete();
             $table->foreignId('scanned_by')->constrained('users')->restrictOnDelete();
@@ -134,15 +134,15 @@ return new class extends Migration
             $table->timestamps(6);
 
             $table->unique('ticket_id');
-            $table->index(['tenant_id', 'scanned_at']);
-            $table->foreign(['tenant_id', 'ticket_id'])
-                ->references(['tenant_id', 'id'])->on('tickets')->restrictOnDelete();
+            $table->index(['eo_id', 'scanned_at']);
+            $table->foreign(['eo_id', 'ticket_id'])
+                ->references(['eo_id', 'id'])->on('tickets')->restrictOnDelete();
         });
 
         // riwayat perubahan kuota
         Schema::create('ticket_inventory_movements', function (Blueprint $table): void {
             $table->id();
-            $table->foreignId('tenant_id')->constrained('tenants')->restrictOnDelete();
+            $table->foreignId('eo_id')->constrained('tenants')->restrictOnDelete();
             $table->unsignedBigInteger('ticket_category_id');
             $table->foreignId('area_hold_id')->nullable()->constrained('area_holds')->nullOnDelete();
             $table->unsignedBigInteger('order_item_id')->nullable();
@@ -152,9 +152,9 @@ return new class extends Migration
             $table->timestamps(6);
 
             $table->unique('idempotency_key');
-            $table->index(['tenant_id', 'ticket_category_id']);
-            $table->foreign(['tenant_id', 'ticket_category_id'])
-                ->references(['tenant_id', 'id'])->on('ticket_categories')->restrictOnDelete();
+            $table->index(['eo_id', 'ticket_category_id']);
+            $table->foreign(['eo_id', 'ticket_category_id'])
+                ->references(['eo_id', 'id'])->on('ticket_categories')->restrictOnDelete();
         });
     }
     
@@ -168,7 +168,7 @@ return new class extends Migration
         Schema::dropIfExists('ticket_checkins');
         Schema::dropIfExists('tickets');
         Schema::table('area_holds', function (Blueprint $table): void {
-            $table->dropForeign(['tenant_id', 'event_order_id']);
+            $table->dropForeign(['eo_id', 'event_order_id']);
             $table->dropColumn('event_order_id');
         });
         Schema::dropIfExists('order_items');

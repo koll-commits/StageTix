@@ -13,12 +13,5 @@ class ReportingServiceProvider extends ModuleServiceProvider
     {
         //
     }
-
-    /**
-     * Bootstrap services.
-     */
-    public function boot(): void
-    {
-        //
-    }
 }
+

@@ -15,7 +15,7 @@ class TicketCategoryFactory extends Factory
     {
         return [
             'event_id' => Event::factory(),
-            'tenant_id' => fn (array $attrs) => Event::query()->whereKey($attrs['event_id'])->value('tenant_id'),
+            'eo_id' => fn (array $attrs) => Event::query()->whereKey($attrs['event_id'])->value('eo_id'),
             'area_id' => fn (array $attrs) => TicketArea::factory()->create(['event_id' => $attrs['event_id']])->id,
             'name' => 'Tiket '.Str::upper(Str::random(5)),
             'price_amount' => fake()->randomElement([150000, 250000, 500000, 1000000]),

@@ -13,12 +13,5 @@ class CatalogServiceProvider extends ModuleServiceProvider
     {
         //
     }
-
-    /**
-     * Bootstrap services.
-     */
-    public function boot(): void
-    {
-        //
-    }
 }
+

@@ -16,7 +16,7 @@ class BalanceController extends Controller
         return view('eo.balance', [
             'balance' => $tenant->balance,
             'accounts' => $tenant->bankAccounts()->orderByDesc('is_primary')->get(),
-            'withdrawals' => Withdrawal::where('tenant_id', $tenant->id)->latest()->limit(10)->get(),
+            'withdrawals' => Withdrawal::where('eo_id', $tenant->id)->latest()->limit(10)->get(),
         ]);
     }
 }

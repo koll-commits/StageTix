@@ -27,7 +27,7 @@ class Ticket extends Model
     /** @return BelongsTo<Tenant, $this> */
     public function tenant(): BelongsTo
     {
-        return $this->belongsTo(Tenant::class);
+        return $this->belongsTo(Tenant::class, 'eo_id');
     }
 
     /** @return BelongsTo<Event, $this> */

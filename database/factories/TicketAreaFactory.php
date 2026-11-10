@@ -14,7 +14,7 @@ class TicketAreaFactory extends Factory
     {
         return [
             'event_id' => Event::factory(),
-            'tenant_id' => fn (array $attrs) => Event::query()->whereKey($attrs['event_id'])->value('tenant_id'),
+            'eo_id' => fn (array $attrs) => Event::query()->whereKey($attrs['event_id'])->value('eo_id'),
             'name' => 'Zona '.Str::upper(Str::random(5)),
             'capacity' => 500,
         ];

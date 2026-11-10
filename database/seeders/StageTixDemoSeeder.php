@@ -62,18 +62,18 @@ class StageTixDemoSeeder extends Seeder
                 'deleted_at' => null,
             ], withTrashed: true);
 
-            $this->upsert(TenantBalance::class, ['tenant_id' => $tenant->id], ['available_amount' => 0, 'held_amount' => 0]);
+            $this->upsert(TenantBalance::class, ['eo_id' => $tenant->id], ['available_amount' => 0, 'held_amount' => 0]);
 
             $this->upsert(
                 CommissionScheme::class,
-                ['tenant_id' => $tenant->id, 'valid_from' => Carbon::create(2026, 1, 1, 0, 0, 0, 'UTC')],
+                ['eo_id' => $tenant->id, 'valid_from' => Carbon::create(2026, 1, 1, 0, 0, 0, 'UTC')],
                 ['commission_rate' => 0.1000, 'valid_to' => null],
             );
 
             [$title, $slug, $genre, $startsAt] = $spec['event'];
             /** @var Event $event */
             $event = $this->upsert(Event::class, ['slug' => $slug], [
-                'tenant_id' => $tenant->id,
+                'eo_id' => $tenant->id,
                 'venue_id' => $venue->id,
                 'title' => $title,
                 'genre' => $genre,
@@ -92,13 +92,13 @@ class StageTixDemoSeeder extends Seeder
 
                 $area = $this->upsert(
                     TicketArea::class,
-                    ['tenant_id' => $tenant->id, 'event_id' => $event->id, 'name' => $areaName],
+                    ['eo_id' => $tenant->id, 'event_id' => $event->id, 'name' => $areaName],
                     ['venue_area_template_id' => $template?->id, 'capacity' => $quota],
                 );
 
                 $this->upsert(
                     TicketCategory::class,
-                    ['tenant_id' => $tenant->id, 'event_id' => $event->id, 'name' => $catName],
+                    ['eo_id' => $tenant->id, 'event_id' => $event->id, 'name' => $catName],
                     [
                         'area_id' => $area->id,
                         'price_amount' => $price,
@@ -113,7 +113,7 @@ class StageTixDemoSeeder extends Seeder
 
             UserTenantRole::firstOrCreate([
                 'user_id' => $users[$spec['owner']]->id,
-                'tenant_id' => $tenant->id,
+                'eo_id' => $tenant->id,
                 'role' => 'owner',
             ]);
 
@@ -125,18 +125,18 @@ class StageTixDemoSeeder extends Seeder
         $gate = Gate::where('venue_id', $venue->id)->where('code', 'G1')->first();
         UserTenantRole::firstOrCreate([
             'user_id' => $users['gate1@stagetix.test']->id,
-            'tenant_id' => $nada->id,
+            'eo_id' => $nada->id,
             'role' => 'gate_staff',
         ]);
         $this->upsert(
             EventStaffAssignment::class,
             ['user_id' => $users['gate1@stagetix.test']->id, 'event_id' => $nadaEvent->id],
-            ['tenant_id' => $nada->id, 'gate_id' => $gate?->id, 'active_user_lock' => $users['gate1@stagetix.test']->id],
+            ['eo_id' => $nada->id, 'gate_id' => $gate?->id, 'active_user_lock' => $users['gate1@stagetix.test']->id],
         );
 
         // promo
         $this->upsert(PromoCode::class, ['code' => 'STAGETIX10'], [
-            'tenant_id' => null,
+            'eo_id' => null,
             'discount_type' => 'percent',
             'discount_value' => 10,
             'max_discount_amount' => 50000,
