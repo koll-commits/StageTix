@@ -32,7 +32,7 @@ class DatabaseSeeder extends Seeder
             [
                 'name' => 'Customer',
                 'email' => 'customer@stagetix.com',
-                'role' => 'null',
+                'role' => null,
             ],
 
         ];

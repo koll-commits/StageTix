@@ -10,7 +10,17 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 
-#[Fillable(['name', 'email', 'password, role', 'status'])]
+/**
+ * @property int $id
+ * @property string $name
+ * @property string $email
+ * @property string|null $role
+ * @property string $status
+ * @property \Illuminate\Support\Carbon|null $email_verified_at
+ * @property string $password
+ * @property string|null $remember_token
+ */
+#[Fillable(['name', 'email', 'password', 'role', 'status'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -29,5 +39,34 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * Apakah user memegang role tertentu. Kontrak role interim Modul 2
+     * (kolom `role`); diformalkan menjadi relasi pada Modul 4–5.
+     */
+    public function hasRole(string $role): bool
+    {
+        return $this->role === $role && $this->isActive();
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->hasRole('admin');
+    }
+
+    public function isEoOperator(): bool
+    {
+        return $this->hasRole('eo');
+    }
+
+    public function isTenantOperator(): bool
+    {
+        return $this->isEoOperator();
+    }
+
+    public function isActive(): bool
+    {
+        return $this->status === 'active';
     }
 }

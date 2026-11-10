@@ -1,6 +1,7 @@
 <?php
+
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return 'Customer Portal StageTix';
+    return view('customer.home');
 })->name('home');
