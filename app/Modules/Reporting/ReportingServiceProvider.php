@@ -4,21 +4,15 @@ namespace App\Modules\Reporting;
 
 use App\Modules\ModuleServiceProvider;
 
-class ReportingServiceProvider extends ModuleServiceProvider
+final class ReportingServiceProvider extends ModuleServiceProvider
 {
-    /**
-     * Register services.
-     */
     public function register(): void
     {
         //
     }
 
-    /**
-     * Bootstrap services.
-     */
-    public function boot(): void
+    protected function moduleAlias(): string
     {
-        //
+        return 'reporting';
     }
 }
