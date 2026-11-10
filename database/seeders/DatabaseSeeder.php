@@ -32,7 +32,7 @@ class DatabaseSeeder extends Seeder
             [
                 'name' => 'Customer',
                 'email' => 'customer@stagetix.com',
-                'role' => 'null',
+                'role' => 'customer',
             ],
 
         ];
@@ -49,5 +49,7 @@ class DatabaseSeeder extends Seeder
                 ->save();
 
         }
+
+        $this->call(StageTixDemoSeeder::class);
     }
 }
