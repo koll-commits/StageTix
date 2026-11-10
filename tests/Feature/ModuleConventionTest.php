@@ -43,7 +43,7 @@ class ModuleConventionTest extends TestCase
     public function test_every_portal_route_carries_expected_middleware(): void
     {
         $portals = [
-            'eo.' => ['web', 'auth', 'verified', 'role:eo'],
+            'eo.' => ['web', 'auth', 'verified', 'tenant'],
             'admin.' => ['web', 'auth', 'verified', 'role:admin'],
             'customer.' => ['web'],
         ];
@@ -53,6 +53,9 @@ class ModuleConventionTest extends TestCase
                 if (str_starts_with((string) $route->getName(), $prefix)) {
                     foreach ($required as $middleware) {
                         $this->assertContains($middleware, $route->gatherMiddleware(), "{$route->getName()} tanpa {$middleware}");
+                    }
+                    if ($prefix === 'eo.') {
+                        $this->assertTrue($route->enforcesScopedBindings());
                     }
                 }
             }

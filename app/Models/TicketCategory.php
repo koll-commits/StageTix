@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToTenant;
 use Database\Factories\TicketCategoryFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -11,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class TicketCategory extends Model
 {
     /** @use HasFactory<TicketCategoryFactory> */
-    use HasFactory;
+    use BelongsToTenant, HasFactory;
 
     protected $fillable = ['event_id', 'area_id', 'name', 'price_amount', 'quota', 'sold_qty', 'is_sold_out', 'is_active', 'sort_order', 'sales_start_at', 'sales_end_at'];
 

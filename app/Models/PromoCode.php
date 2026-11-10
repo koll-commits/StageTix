@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToTenant;
 use Database\Factories\PromoCodeFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -10,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class PromoCode extends Model
 {
     /** @use HasFactory<PromoCodeFactory> */
-    use HasFactory;
+    use BelongsToTenant, HasFactory;
 
     protected $fillable = ['code', 'discount_type', 'discount_value', 'max_discount_amount', 'usage_limit', 'used_count', 'per_user_limit', 'valid_from', 'valid_to', 'is_active'];
 

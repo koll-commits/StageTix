@@ -8,6 +8,7 @@ return [
     App\Modules\Payments\PaymentsServiceProvider::class,
     App\Modules\Gate\GateServiceProvider::class,
     App\Modules\Reporting\ReportingServiceProvider::class,
+    App\Modules\Customer\CustomerServiceProvider::class,
     
 
 ];

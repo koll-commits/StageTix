@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToTenant;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class TenantBankAccount extends Model
 {
+    use BelongsToTenant;
+
     protected $fillable = ['account_number_cipher', 'account_last4', 'bank_code', 'account_holder', 'status', 'is_primary'];
     protected $hidden = ['account_number_cipher'];
 

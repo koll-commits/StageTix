@@ -17,7 +17,8 @@ class ResolveEoTenant
 {
     public function handle(Request $request, Closure $next, ?string $level = null): Response
     {
-        $tenant = Tenant::where('slug', (string) $request->route('eo'))->first();
+        $param = $request->route('eo');
+        $tenant = $param instanceof Tenant ? $param : Tenant::where('slug', (string) $param)->first();
         $role = $tenant
             ? $request->user()->tenantRoles()->where('eo_id', $tenant->id)->value('role')
             : null;

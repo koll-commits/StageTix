@@ -4,16 +4,14 @@ namespace Tests\Feature;
 
 use App\Models\Tenant;
 use App\Models\User;
+use App\Modules\Admin\AdminServiceProvider;
 use App\Modules\Catalog\CatalogServiceProvider;
 use App\Modules\Gate\GateServiceProvider;
+use App\Modules\Ordering\OrderingServiceProvider;
 use App\Modules\Payments\PaymentsServiceProvider;
 use App\Modules\Reporting\ReportingServiceProvider;
-use App\Modules\Admin\AdminServiceProvider;
-use App\Modules\Ordering\OrderingServiceProvider;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
-
 
 class ModularFoundationTest extends TestCase
 {
@@ -31,12 +29,11 @@ class ModularFoundationTest extends TestCase
         ])->save();
 
         return $user;
-
     }
 
-    private function tenantFor(User $user, string $role = 'owner'): Tenant
+    private function tenantFor(User $user, string $role = 'owner', string $status = 'active'): Tenant
     {
-        $tenant = Tenant::factory()->create(['slug' => 'demo', 'status' => 'active']);
+        $tenant = Tenant::factory()->create(['slug' => 'demo', 'status' => $status]);
 
         $user->tenantRoles()->forceCreate([
             'user_id' => $user->id,
@@ -58,19 +55,17 @@ class ModularFoundationTest extends TestCase
         $this->get(route('admin.dashboard'))->assertRedirect(route('login'));
     }
 
-   
     public function test_eo_operator_can_open_eo_dashboard(): void
     {
-         $this->withoutVite();
+        $this->withoutVite();
 
-         $user = $this->user('eo');
-         $this->tenantFor($user);
+        $user = $this->user('eo');
+        $tenant = $this->tenantFor($user);
 
-         $this->actingAs($user);
-         $this->get(route('eo.dashboard', ['eo' => 'demo']))->assertOk();
+        $this->actingAs($user);
+        $this->get(route('eo.dashboard', ['eo' => $tenant->slug]))->assertOk();
     }
-    
-    
+
     public function test_admin_can_open_admin_dashboard(): void
     {
         $this->actingAs($this->user('admin'));
@@ -83,22 +78,41 @@ class ModularFoundationTest extends TestCase
         $this->actingAs($this->user('eo'));
         $this->get(route('admin.dashboard'))->assertForbidden();
 
-        $this->actingAs($this->user('admin'));
-        $this->get(route('eo.dashboard', ['eo' => 'demo']))->assertForbidden();
+        $admin = $this->user('admin');
+        $this->actingAs($admin);
+        $tenant = Tenant::factory()->create(['slug' => 'demo']);
+        $this->get(route('eo.dashboard', ['eo' => $tenant->slug]))->assertForbidden();
     }
 
     public function test_user_without_role_is_forbidden_on_internal_contexts(): void
     {
         $this->actingAs($this->user(null));
         $this->get(route('admin.dashboard'))->assertForbidden();
-        $this->get(route('eo.dashboard', ['eo' => 'demo']))->assertForbidden();
+
+        $tenant = Tenant::factory()->create(['slug' => 'demo']);
+        $this->get(route('eo.dashboard', ['eo' => $tenant->slug]))->assertForbidden();
     }
 
     public function test_suspended_operator_is_forbidden(): void
     {
-        $this->actingAs($this->user('eo', status:'suspended'));
-        $this->get(route('eo.dashboard', ['eo' => 'demo']))->assertForbidden();
-    }   
+        $user = $this->user('eo', status: 'suspended');
+        $tenant = $this->tenantFor($user);
+        $this->actingAs($user);
+        $this->get(route('eo.dashboard', ['eo' => $tenant->slug]))->assertForbidden();
+    }
+
+    public function test_suspended_tenant_is_forbidden_even_for_member(): void
+    {
+        $user = $this->user('eo');
+        $tenant = Tenant::factory()->create(['slug' => 'suspended-eo', 'status' => 'suspended']);
+        $user->tenantRoles()->forceCreate([
+            'user_id' => $user->id,
+            'eo_id' => $tenant->id,
+            'role' => 'owner',
+        ]);
+        $this->actingAs($user);
+        $this->get(route('eo.dashboard', ['eo' => $tenant->slug]))->assertForbidden();
+    }
 
     public function test_all_six_module_providers_are_registered(): void
     {
@@ -112,7 +126,7 @@ class ModularFoundationTest extends TestCase
         ] as $provider) {
             $this->assertTrue(
                 app()->providerIsLoaded($provider),
-                "Provider tidak terdaftar: $provider"
+                "Provider tidak terdaftar: {$provider}"
             );
         }
     }

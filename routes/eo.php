@@ -19,7 +19,7 @@ Route::middleware(ResolveEoTenant::class)->group(function (): void {
 Route::middleware(ResolveEoTenant::class.':manage')->group(function (): void {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
 
-    Route::resource('events', EventController::class)->except('destroy');
+    Route::resource('events', EventController::class)->only(['create', 'store', 'edit']);
     Route::post('/events/{event}/areas', [TicketAreaController::class, 'store'])->name('areas.store');
     Route::post('/events/{event}/categories', [TicketCategoryController::class, 'store'])->name('categories.store');
     Route::put('/categories/{category}', [TicketCategoryController::class, 'update'])->name('categories.update');
