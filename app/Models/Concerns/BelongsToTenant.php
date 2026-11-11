@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Model;
  * Model tenant-owned: menambahkan global scope eo_id dan mengisi eo_id saat create
  * dari TenantContext aktif. Auto-fill membantu konsistensi, tetapi policy + composite FK
  * database tetap wajib (pertahanan berlapis). eo_id TIDAK boleh mass-assignable.
- *
+
  * Catatan: scope hanya memfilter saat context terisi. Route internal SELALU mengisi context
  * (SetTenantContext); alur lintas-tenant yang sah memakai withoutGlobalScope('tenant') + filter
  * eksplisit. Write tanpa context gagal via NOT NULL eo_id di DB (fail-closed).
